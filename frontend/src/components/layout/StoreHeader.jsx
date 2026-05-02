@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Heart,
   Menu,
@@ -20,6 +24,22 @@ const navItems = [
 ];
 
 export default function StoreHeader() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+
+    const trimmedQuery = searchQuery.trim();
+
+    if (!trimmedQuery) {
+      router.push("/products");
+      return;
+    }
+
+    router.push(`/products?search=${encodeURIComponent(trimmedQuery)}`);
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-[#f8f3ea]/90 backdrop-blur-xl">
       <div className="bg-linear-to-r from-[#ff6a00] via-[#ffb000] to-[#ff3d00] px-4 py-2 text-center text-xs font-black tracking-wide text-white shadow-sm sm:text-sm">
@@ -47,19 +67,27 @@ export default function StoreHeader() {
           </div>
         </Link>
 
-        <div className="hidden flex-1 items-center rounded-full border border-stone-300/80 bg-white px-3 shadow-sm transition focus-within:border-[#db2777]/40 focus-within:ring-4 focus-within:ring-[#db2777]/10 lg:flex">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="hidden flex-1 items-center rounded-full border border-stone-300/80 bg-white px-3 shadow-sm transition focus-within:border-[#db2777]/40 focus-within:ring-4 focus-within:ring-[#db2777]/10 lg:flex"
+        >
           <Search className="ml-2 h-5 w-5 text-stone-400" />
 
           <input
             type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search products, brands, categories..."
             className="h-12 flex-1 bg-transparent px-3 text-sm font-semibold text-stone-900 outline-none placeholder:text-stone-400"
           />
 
-          <button className="rounded-full bg-stone-950 px-6 py-2.5 text-sm font-black text-white transition hover:bg-[#db2777]">
+          <button
+            type="submit"
+            className="rounded-full bg-stone-950 px-6 py-2.5 text-sm font-black text-white transition hover:bg-[#db2777]"
+          >
             Search
           </button>
-        </div>
+        </form>
 
         <div className="ml-auto flex items-center gap-2">
           <Link
@@ -92,6 +120,7 @@ export default function StoreHeader() {
           <button
             className="rounded-full border border-stone-200 bg-white p-2.5 text-stone-700 shadow-sm transition hover:bg-stone-100 lg:hidden"
             aria-label="Open menu"
+            type="button"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -122,15 +151,20 @@ export default function StoreHeader() {
         </div>
 
         <div className="px-4 py-3 lg:hidden">
-          <div className="flex items-center rounded-full border border-stone-300 bg-white px-3 shadow-sm focus-within:border-[#db2777]/40 focus-within:ring-4 focus-within:ring-[#db2777]/10">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex items-center rounded-full border border-stone-300 bg-white px-3 shadow-sm focus-within:border-[#db2777]/40 focus-within:ring-4 focus-within:ring-[#db2777]/10"
+          >
             <Search className="h-5 w-5 text-stone-400" />
 
             <input
               type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search products..."
               className="h-11 flex-1 bg-transparent px-3 text-sm font-semibold text-stone-900 outline-none placeholder:text-stone-400"
             />
-          </div>
+          </form>
         </div>
       </div>
     </header>

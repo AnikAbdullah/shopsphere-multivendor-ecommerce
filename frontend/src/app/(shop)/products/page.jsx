@@ -10,121 +10,151 @@ import ProductCard from "@/components/products/ProductCard";
 import ProductSearch from "@/components/products/ProductSearch";
 import ProductSort from "@/components/products/ProductSort";
 import ProductCategoryFilter from "@/components/products/ProductCategoryFilter";
+import Pagination from "@/components/common/Pagination";
 import ProductPriceFilter from "@/components/products/ProductPriceFilter";
 import {
   getProductsFromResponse,
   mergeProductsWithFallback,
 } from "@/lib/productHelpers";
 
+const getPriceParams = (priceRange) => {
+  if (priceRange === "under-10000") {
+    return {
+      maxPrice: 9999,
+    };
+  }
+
+  if (priceRange === "10000-20000") {
+    return {
+      minPrice: 10000,
+      maxPrice: 20000,
+    };
+  }
+
+  if (priceRange === "20000-50000") {
+    return {
+      minPrice: 20000,
+      maxPrice: 50000,
+    };
+  }
+
+  if (priceRange === "over-50000") {
+    return {
+      minPrice: 50001,
+    };
+  }
+
+  return {};
+};
+
+const getSortParam = (sortBy) => {
+  if (sortBy === "price-low") return "price";
+  if (sortBy === "price-high") return "-price";
+  if (sortBy === "rating-high") return "-ratingAverage";
+  if (sortBy === "name-az") return "name";
+
+  return "-createdAt";
+};
+
 export default function ProductsPage() {
   const [products, setProducts] = useState(fallbackProducts);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [priceRange, setPriceRange] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(fallbackProducts.length);
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const selectedCategory = searchParams.get("category") || "";
+  const urlSearchTerm = searchParams.get("search") || "";
+
+  useEffect(() => {
+    setSearchTerm(urlSearchTerm);
+  }, [urlSearchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, sortBy, priceRange]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
 
+        const hasActiveFilters =
+          searchTerm ||
+          selectedCategory ||
+          sortBy !== "default" ||
+          priceRange !== "all";
+
         const response = await api.get(endpoints.products.root, {
           params: {
-            limit: 12,
-            sort: "-createdAt",
+            search: searchTerm || undefined,
+            category: selectedCategory || undefined,
+            sort: getSortParam(sortBy),
+            page: currentPage,
+            limit: 8,
+            ...getPriceParams(priceRange),
           },
         });
 
-        const backendProducts = getProductsFromResponse(response.data?.data);
+        const responseData = response.data?.data;
+        const backendProducts = getProductsFromResponse(responseData);
 
-        const formattedProducts = mergeProductsWithFallback(
-          backendProducts,
-          fallbackProducts,
-          12,
-        );
+        const total =
+          responseData?.pagination?.totalProducts ||
+          responseData?.totalProducts ||
+          responseData?.total ||
+          backendProducts.length;
 
-        setProducts(formattedProducts);
+        if (backendProducts.length > 0) {
+          const formattedProducts = mergeProductsWithFallback(
+            backendProducts,
+            [],
+            8,
+          );
+
+          setProducts(formattedProducts);
+          setTotalProducts(total);
+          return;
+        }
+
+        if (hasActiveFilters) {
+          setProducts([]);
+          setTotalProducts(0);
+          return;
+        }
+
+        setProducts(fallbackProducts);
+        setTotalProducts(fallbackProducts.length);
       } catch (error) {
         console.log("Failed to fetch products:", error.message);
-        setProducts(fallbackProducts);
+
+        const hasActiveFilters =
+          searchTerm ||
+          selectedCategory ||
+          sortBy !== "default" ||
+          priceRange !== "all";
+
+        if (hasActiveFilters) {
+          setProducts([]);
+          setTotalProducts(0);
+        } else {
+          setProducts(fallbackProducts);
+          setTotalProducts(fallbackProducts.length);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [searchTerm, selectedCategory, sortBy, priceRange, currentPage]);
 
-  const getNumericPrice = (price) => {
-    return Number(String(price).replace(/[^\d]/g, ""));
-  };
-
-  const matchesPriceRange = (price, range) => {
-    const numericPrice = getNumericPrice(price);
-
-    if (range === "under-10000") {
-      return numericPrice < 10000;
-    }
-
-    if (range === "10000-20000") {
-      return numericPrice >= 10000 && numericPrice <= 20000;
-    }
-
-    if (range === "20000-50000") {
-      return numericPrice >= 20000 && numericPrice <= 50000;
-    }
-
-    if (range === "over-50000") {
-      return numericPrice > 50000;
-    }
-
-    return true;
-  };
-
-  const filteredProducts = products
-    .filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      const matchesCategory = selectedCategory
-        ? String(product.category || "")
-            .toLowerCase()
-            .includes(selectedCategory.toLowerCase())
-        : true;
-
-      const matchesPrice = matchesPriceRange(product.price, priceRange);
-
-      return matchesSearch && matchesCategory && matchesPrice;
-    })
-    .sort((firstProduct, secondProduct) => {
-      const firstPrice = getNumericPrice(firstProduct.price);
-      const secondPrice = getNumericPrice(secondProduct.price);
-
-      if (sortBy === "price-low") {
-        return firstPrice - secondPrice;
-      }
-
-      if (sortBy === "price-high") {
-        return secondPrice - firstPrice;
-      }
-
-      if (sortBy === "rating-high") {
-        return (
-          Number(secondProduct.rating || 0) - Number(firstProduct.rating || 0)
-        );
-      }
-
-      if (sortBy === "name-az") {
-        return firstProduct.name.localeCompare(secondProduct.name);
-      }
-
-      return 0;
-    });
+  const totalPages = Math.ceil(totalProducts / 8);
 
   const hasActiveFilters =
     searchTerm ||
@@ -136,6 +166,7 @@ export default function ProductsPage() {
     setSearchTerm("");
     setSortBy("default");
     setPriceRange("all");
+    setCurrentPage(1);
     router.push("/products");
   };
 
@@ -184,9 +215,9 @@ export default function ProductsPage() {
 
         <div className="mb-6 flex flex-col justify-between gap-3 rounded-[1.25rem] bg-neutral-50 px-4 py-3 sm:flex-row sm:items-center">
           <p className="text-sm font-bold text-neutral-600">
-            Showing{" "}
-            <span className="text-black">{filteredProducts.length}</span>{" "}
-            product{filteredProducts.length === 1 ? "" : "s"}
+            Showing <span className="text-black">{products.length}</span> of{" "}
+            <span className="text-black">{totalProducts}</span> product
+            {totalProducts === 1 ? "" : "s"}
           </p>
 
           {hasActiveFilters && (
@@ -200,7 +231,7 @@ export default function ProductsPage() {
           )}
         </div>
 
-        {filteredProducts.length === 0 && (
+        {products.length === 0 && (
           <div className="rounded-[1.5rem] bg-neutral-100 p-8 text-center">
             <p className="text-sm font-bold text-neutral-600">
               No products found
@@ -209,19 +240,27 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {filteredProducts.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id || product.name}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: index * 0.04 }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </div>
+        {products.length > 0 && (
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {products.map((product, index) => (
+                <motion.div
+                  key={product.id || product.name}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.04 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
         )}
       </div>
     </main>
