@@ -21,6 +21,11 @@ export const formatBackendProduct = (product) => {
     id: product._id || product.id,
     name: product.name,
     slug: product.slug,
+    category:
+      product.category?.slug ||
+      product.category?.name ||
+      product.category ||
+      "",
     image: getImageUrl(product.images?.[0], fallbackProductImage),
     rating: product.ratingAverage || 0,
     price: formatCurrency(finalPrice),
