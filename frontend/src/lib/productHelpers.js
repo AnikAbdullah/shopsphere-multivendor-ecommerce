@@ -28,6 +28,7 @@ export const formatBackendProduct = (product) => {
       "",
     image: getImageUrl(product.images?.[0], fallbackProductImage),
     rating: product.ratingAverage || 0,
+    rawPrice: finalPrice,
     price: formatCurrency(finalPrice),
     oldPrice: oldPrice ? formatCurrency(oldPrice) : "",
   };

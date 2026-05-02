@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCartStore } from "@/stores/cartStore";
 import {
   Heart,
   Menu,
@@ -26,6 +27,17 @@ const navItems = [
 export default function StoreHeader() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [hasMounted, setHasMounted] = useState(false);
+
+  const cartItems = useCartStore((state) => state.items);
+
+  const totalCartItems = cartItems.reduce((total, item) => {
+    return total + item.quantity;
+  }, 0);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
@@ -53,6 +65,7 @@ export default function StoreHeader() {
         <Link href="/" className="group flex shrink-0 items-center gap-3">
           <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-stone-950 text-white shadow-sm transition group-hover:-translate-y-0.5">
             <ShoppingBag className="h-5 w-5" />
+
             <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-[#db2777] ring-4 ring-[#f8f3ea]" />
           </div>
 
@@ -112,8 +125,9 @@ export default function StoreHeader() {
             aria-label="Cart"
           >
             <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#db2777] text-[10px] font-black text-white ring-2 ring-[#f8f3ea]">
-              0
+
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#db2777] px-1 text-[10px] font-black text-white ring-2 ring-[#f8f3ea]">
+              {hasMounted ? totalCartItems : 0}
             </span>
           </Link>
 

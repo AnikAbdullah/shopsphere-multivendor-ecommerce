@@ -116,65 +116,81 @@ export const promoCards = [
 export const popularProducts = [
   {
     name: "Wireless Headphones",
+    category: "headphones",
     image:
       "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?auto=format&fit=crop&w=600&q=80",
     rating: 4.9,
+    rawPrice: 21900,
     price: "BDT 21,900",
     oldPrice: "BDT 27,500",
   },
   {
     name: "Smart Watch",
+    category: "watches",
     image:
       "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=600&q=80",
     rating: 4.8,
+    rawPrice: 16900,
     price: "BDT 16,900",
     oldPrice: "BDT 21,500",
   },
   {
     name: "Running Sneakers",
+    category: "sneakers",
     image:
       "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=600&q=80",
     rating: 4.7,
+    rawPrice: 14500,
     price: "BDT 14,500",
     oldPrice: "BDT 17,900",
   },
   {
     name: "Minimal Backpack",
+    category: "backpacks",
     image:
       "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80",
     rating: 4.8,
+    rawPrice: 8900,
     price: "BDT 8,900",
     oldPrice: "BDT 11,900",
   },
   {
     name: "Desk Speaker",
+    category: "speakers",
     image:
       "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80",
     rating: 4.6,
+    rawPrice: 10900,
     price: "BDT 10,900",
     oldPrice: "BDT 14,200",
   },
   {
     name: "Gaming Mouse",
+    category: "accessories",
     image:
       "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=600&q=80",
     rating: 4.7,
+    rawPrice: 7900,
     price: "BDT 7,900",
     oldPrice: "BDT 10,500",
   },
   {
     name: "Laptop Stand",
+    category: "accessories",
     image:
       "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=600&q=80",
     rating: 4.5,
+    rawPrice: 5900,
     price: "BDT 5,900",
     oldPrice: "BDT 7,900",
   },
   {
     name: "Travel Camera",
+    category: "cameras",
     image:
       "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80",
     rating: 4.8,
+    rawPrice: 54900,
     price: "BDT 54,900",
     oldPrice: "BDT 66,500",
   },

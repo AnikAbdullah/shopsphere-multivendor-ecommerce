@@ -1,11 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import { Heart, ShoppingCart, Star } from "lucide-react";
+import { useCartStore } from "@/stores/cartStore";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?auto=format&fit=crop&w=600&q=80";
 
+const getNumericPrice = (price) => {
+  return Number(String(price).replace(/[^\d]/g, ""));
+};
+
 export default function ProductCard({ product }) {
+  const addItem = useCartStore((state) => state.addItem);
+
   const productLink = product.slug ? `/products/${product.slug}` : "/products";
+
+  const handleAddToCart = () => {
+    addItem({
+      ...product,
+      rawPrice: product.rawPrice || getNumericPrice(product.price),
+    });
+  };
 
   return (
     <div className="group rounded-[1.5rem] bg-[#fafafa] p-4 transition hover:-translate-y-1 hover:shadow-md">
@@ -19,6 +35,10 @@ export default function ProductCard({ product }) {
 
           <button
             type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
             className="absolute right-3 top-3 rounded-full bg-white p-2 text-neutral-700 shadow-sm transition hover:text-rose-500"
           >
             <Heart className="h-4 w-4" />
@@ -52,7 +72,9 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
+          onClick={handleAddToCart}
           className="rounded-full bg-black p-2 text-white transition hover:bg-orange-500"
+          aria-label={`Add ${product.name} to cart`}
         >
           <ShoppingCart className="h-4 w-4" />
         </button>
