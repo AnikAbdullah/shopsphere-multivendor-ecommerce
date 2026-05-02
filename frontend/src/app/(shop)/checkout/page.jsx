@@ -26,6 +26,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState("");
+  const [createdOrderId, setCreatedOrderId] = useState("");
 
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
@@ -75,6 +76,7 @@ export default function CheckoutPage() {
       setIsSubmitting(true);
       setOrderError("");
       setOrderSuccess("");
+      setCreatedOrderId("");
 
       const orderItems = items.map((item) => ({
         product: isMongoObjectId(item.id) ? item.id : null,
@@ -97,8 +99,11 @@ export default function CheckoutPage() {
 
       const response = await api.post(endpoints.orders.root, payload);
 
+      const createdOrder = response.data?.data?.order;
+
       clearCart();
 
+      setCreatedOrderId(createdOrder?._id || "");
       setOrderSuccess(response.data?.message || "Order placed successfully.");
 
       setFormData({
@@ -144,12 +149,30 @@ export default function CheckoutPage() {
             {orderSuccess}
           </p>
 
-          <Link
-            href="/products"
-            className="mt-6 inline-flex rounded-full bg-black px-6 py-3 text-sm font-black text-white transition hover:bg-orange-500"
-          >
-            Continue shopping
-          </Link>
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            {createdOrderId && (
+              <Link
+                href={`/orders/${createdOrderId}`}
+                className="inline-flex rounded-full bg-black px-6 py-3 text-sm font-black text-white transition hover:bg-orange-500"
+              >
+                View this order
+              </Link>
+            )}
+
+            <Link
+              href="/orders"
+              className="inline-flex rounded-full border border-neutral-200 bg-white px-6 py-3 text-sm font-black text-black transition hover:bg-neutral-100"
+            >
+              View all orders
+            </Link>
+
+            <Link
+              href="/products"
+              className="inline-flex rounded-full border border-neutral-200 bg-white px-6 py-3 text-sm font-black text-black transition hover:bg-neutral-100"
+            >
+              Continue shopping
+            </Link>
+          </div>
         </div>
       </main>
     );

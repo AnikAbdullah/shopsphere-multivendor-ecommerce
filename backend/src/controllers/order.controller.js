@@ -63,6 +63,47 @@ const createOrder = async (req, res, next) => {
   }
 };
 
+const getOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 }).limit(20);
+
+    return res.status(200).json({
+      success: true,
+      message: "Orders retrieved successfully.",
+      data: {
+        orders,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getOrderById = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order retrieved successfully.",
+      data: {
+        order,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
+  getOrders,
+  getOrderById,
 };

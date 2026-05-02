@@ -7,6 +7,7 @@ import { useCartStore } from "@/stores/cartStore";
 import {
   Heart,
   Menu,
+  PackageCheck,
   Search,
   ShoppingBag,
   ShoppingCart,
@@ -120,6 +121,14 @@ export default function StoreHeader() {
           </Link>
 
           <Link
+            href="/orders"
+            className="hidden rounded-full border border-stone-200 bg-white p-2.5 text-stone-700 shadow-sm transition hover:-translate-y-0.5 hover:border-[#db2777]/30 hover:bg-pink-50 hover:text-[#db2777] sm:inline-flex"
+            aria-label="Orders"
+          >
+            <PackageCheck className="h-5 w-5" />
+          </Link>
+
+          <Link
             href="/cart"
             className="relative rounded-full bg-stone-950 p-2.5 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#db2777]"
             aria-label="Cart"
@@ -156,12 +165,21 @@ export default function StoreHeader() {
             ))}
           </nav>
 
-          <Link
-            href="/seller"
-            className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-black text-stone-800 shadow-sm transition hover:-translate-y-0.5 hover:border-[#db2777]/30 hover:bg-pink-50 hover:text-[#db2777]"
-          >
-            Become a seller
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/orders"
+              className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-black text-stone-800 shadow-sm transition hover:-translate-y-0.5 hover:border-[#db2777]/30 hover:bg-pink-50 hover:text-[#db2777]"
+            >
+              My Orders
+            </Link>
+
+            <Link
+              href="/seller"
+              className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-black text-stone-800 shadow-sm transition hover:-translate-y-0.5 hover:border-[#db2777]/30 hover:bg-pink-50 hover:text-[#db2777]"
+            >
+              Become a seller
+            </Link>
+          </div>
         </div>
 
         <div className="px-4 py-3 lg:hidden">
