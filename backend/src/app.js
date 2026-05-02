@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const path = require("path");
 
 const env = require("./config/env");
 const apiRoutes = require("./routes/index.routes");
@@ -19,7 +20,14 @@ app.use(
   }),
 );
 
-app.use(helmet());
+// Allows frontend localhost:3000 to load images from backend localhost:5000
+app.use(
+  helmet({
+    crossOriginResourcePolicy: {
+      policy: "cross-origin",
+    },
+  }),
+);
 
 app.use(
   rateLimit({
@@ -39,6 +47,9 @@ if (!env.isProduction) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve local uploaded files
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/", (req, res) => {
   res.send("ShopSphere backend is running");
