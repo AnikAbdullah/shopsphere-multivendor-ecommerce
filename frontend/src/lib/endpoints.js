@@ -25,4 +25,7 @@ export const endpoints = {
   uploads: {
     products: "/uploads/products",
   },
+  orders: {
+    root: "/orders",
+  },
 };
