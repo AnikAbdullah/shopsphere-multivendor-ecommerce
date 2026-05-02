@@ -11,10 +11,12 @@ import {
   mergeProductsWithFallback,
 } from "@/lib/productHelpers";
 import ProductSearch from "@/components/products/ProductSearch";
+import ProductSort from "@/components/products/ProductSort";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState(fallbackProducts);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -48,9 +50,38 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .sort((firstProduct, secondProduct) => {
+      const firstPrice = Number(
+        String(firstProduct.price).replace(/[^\d]/g, ""),
+      );
+      const secondPrice = Number(
+        String(secondProduct.price).replace(/[^\d]/g, ""),
+      );
+
+      if (sortBy === "price-low") {
+        return firstPrice - secondPrice;
+      }
+
+      if (sortBy === "price-high") {
+        return secondPrice - firstPrice;
+      }
+
+      if (sortBy === "rating-high") {
+        return (
+          Number(secondProduct.rating || 0) - Number(firstProduct.rating || 0)
+        );
+      }
+
+      if (sortBy === "name-az") {
+        return firstProduct.name.localeCompare(secondProduct.name);
+      }
+
+      return 0;
+    });
 
   return (
     <main className="min-h-screen bg-white px-4 py-10 sm:px-6 lg:px-8">
@@ -71,7 +102,10 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:items-end">
-            <ProductSearch value={searchTerm} onChange={setSearchTerm} />
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <ProductSearch value={searchTerm} onChange={setSearchTerm} />
+              <ProductSort value={sortBy} onChange={setSortBy} />
+            </div>
 
             {isLoading && (
               <p className="text-sm font-bold text-neutral-500">
