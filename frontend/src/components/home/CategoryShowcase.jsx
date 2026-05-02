@@ -5,38 +5,8 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
+import { getImageUrl } from "@/lib/getImageUrl";
 import { fallbackCategories, defaultCategoryImage } from "@/data/homeData";
-
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
-
-const backendBaseUrl = apiBaseUrl.replace("/api", "");
-
-const getImageUrl = (image) => {
-  if (!image) return defaultCategoryImage;
-
-  if (typeof image === "string") {
-    if (image.startsWith("http")) return image;
-
-    if (image.startsWith("/")) {
-      return `${backendBaseUrl}${image}`;
-    }
-
-    return `${backendBaseUrl}/${image}`;
-  }
-
-  if (image.url) {
-    if (image.url.startsWith("http")) return image.url;
-
-    if (image.url.startsWith("/")) {
-      return `${backendBaseUrl}${image.url}`;
-    }
-
-    return `${backendBaseUrl}/${image.url}`;
-  }
-
-  return defaultCategoryImage;
-};
 
 const getCategoriesFromResponse = (responseData) => {
   if (Array.isArray(responseData)) return responseData;
@@ -52,7 +22,10 @@ const formatBackendCategory = (category) => {
     id: category._id || category.id,
     name: category.name,
     slug: category.slug || category._id || category.id || category.name,
-    image: getImageUrl(category.image || category.thumbnail),
+    image: getImageUrl(
+      category.image || category.thumbnail,
+      defaultCategoryImage,
+    ),
   };
 };
 
